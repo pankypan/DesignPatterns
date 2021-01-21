@@ -1,4 +1,169 @@
-# 设计模式python实现(03)--抽象工厂模式
+# 设计模式python实现(01)--工厂模式相关
+
+## 简单工厂模式
+
+- **内容：**不直接向客户端暴露对象创建的实现细节，而是通过一个工厂类来负责创建产品类的实例。
+- **角色：**
+  - 工厂角色（Creator）
+  - 抽象产品角色（Product）
+  - 具体产品角色（Concrete Product）
+
+```python
+"""
+简单工厂模式
+author: panky
+"""
+import abc  # 利用abc模块实现抽象类
+
+
+class Operation(metaclass=abc.ABCMeta):
+    def __init__(self, number_a, number_b):
+        self._numberA = number_a
+        self._numberB = number_b
+
+    @abc.abstractmethod  # 定义抽象方法，无需实现功能, 由子类实现具体功能
+    def get_result(self):
+        pass
+
+
+class OperationAdd(Operation):
+    def get_result(self):
+        return self._numberA + self._numberB
+
+
+class OperationSub(Operation):
+    def get_result(self):
+        return self._numberA - self._numberB
+
+
+class OperationMul(Operation):
+    def get_result(self):
+        return self._numberA * self._numberB
+
+
+class OperationDiv(Operation):
+    def get_result(self):
+        try:
+            return self._numberA / self._numberB
+        except ZeroDivisionError:
+            print("Divide by zero!")
+            return 0
+
+
+class OperationFactory(object):
+    operation_map = {
+        '+': OperationAdd,
+        '-': OperationSub,
+        '*': OperationMul,
+        '/': OperationDiv
+    }
+
+    def creat_operation(self, op: str, num_a, num_b):
+        operation_class = self.operation_map.get(op)
+        if operation_class:
+            operation = operation_class(num_a, num_b)
+            return operation
+        else:
+            raise Exception("非法操作")
+
+
+if __name__ == '__main__':
+    while True:
+        raw_str = input("输入算式：").strip()
+        if raw_str == 'Q':
+            break
+        a, opr, b = raw_str.split(' ')
+        factory = OperationFactory()
+        opr_obj = factory.creat_operation(opr, int(a), int(b))
+        res = opr_obj.get_result()
+        print(res)
+```
+
+
+
+
+
+## 工厂方法模式
+
+**工厂方法模式(Factory Method):**定义一个用于创建对象的接口，让子类去决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。
+
+### 工厂方法模式结构图
+
+![工厂方法模式结构图](assets/工厂方法模式结构图.png)
+
+
+
+### 工厂方法模式案例
+
+```python
+"""
+工厂方法模式
+Author: panky
+"""
+import abc
+
+
+class LeiFeng(metaclass=abc.ABCMeta):
+    def sweep(self):
+        print("扫地")
+
+    def wash(self):
+        print("洗衣")
+
+    def buy_rice(self):
+        print("买米")
+
+
+# 学雷锋的大学生
+class Undergraduate(LeiFeng):
+    pass
+
+
+# 学雷锋的志愿者
+class Volunteer(LeiFeng):
+    pass
+
+
+# 雷锋工厂
+class IFactory(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def create_lei_feng(self) -> LeiFeng:
+        pass
+
+
+# 学雷锋的大学生工厂
+class UndergraduateFactory(IFactory):
+    def create_lei_feng(self) -> LeiFeng:
+        return Undergraduate()
+
+
+class VolunteerFactory(IFactory):
+    def create_lei_feng(self) -> LeiFeng:
+        return Volunteer()
+
+
+if __name__ == "__main__":
+    factory = UndergraduateFactory()
+    lf = factory.create_lei_feng()
+
+    lf.buy_rice()
+    lf.sweep()
+    lf.wash()
+
+    print('\n')
+    factory = VolunteerFactory()
+    lf2 = factory.create_lei_feng()
+    lf2.wash()
+    lf2.sweep()
+    lf2.buy_rice()
+
+```
+
+
+
+
+
+## 抽象工厂模式
 
 **抽象工厂模式：定义了一个接口，所有具体工厂必须实现此接口，该接口包含一组生成产品的方法。**
 
